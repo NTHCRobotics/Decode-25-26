@@ -37,7 +37,7 @@ public class mallardDrive {
     public void loop() {
         drive();
         ariseElevator();
-        rotation();
+        rotationManual();
         //launch();
     }
 
@@ -59,7 +59,6 @@ public class mallardDrive {
     }
     public void ariseElevator() {
         // ascendButton = gamepad1.y;
-        // descendButton = gamepad1.a
 
         if (gamepad1.y){
             elevate.setPosition(0.5);
@@ -67,14 +66,8 @@ public class mallardDrive {
             elevate.setPosition(0.0);
         }
 
-        if (gamepad1.b){
-            elevate.setDirection(Servo.Direction.REVERSE);
-            elevate.setPosition(0.5);
-        } else {
-            elevate.setPosition(0.0);
-        }
     }
-    public void rotation(){
+    public void rotationManual(){
         // rotateButton = gamepad1.b;
 
         if (gamepad1.b){
@@ -86,7 +79,6 @@ public class mallardDrive {
     public void launch(){
         // launchTrigger = gamepad1.right_trigger;
 
-        if (triggervalue)
     }
 
 }
