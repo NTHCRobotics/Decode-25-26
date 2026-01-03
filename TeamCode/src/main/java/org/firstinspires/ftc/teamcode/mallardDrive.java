@@ -26,36 +26,39 @@ public class mallardDrive extends OpMode {
         telemetry.addData("Status", "Initialization Started");
 
         //Movement wheels initialization
-        wheelFL = hardwareMap.get(DcMotorEx.class, "wheelFL");
-        wheelFR = hardwareMap.get(DcMotorEx.class, "wheelFR");
-        wheelBL = hardwareMap.get(DcMotorEx.class, "wheelBL");
-        wheelBR = hardwareMap.get(DcMotorEx.class, "wheelBR");
+     //   wheelFL = hardwareMap.get(DcMotorEx.class, "wheelFL");
+     //   wheelFR = hardwareMap.get(DcMotorEx.class, "wheelFR");
+     //   wheelBL = hardwareMap.get(DcMotorEx.class, "wheelBL");
+     //   wheelBR = hardwareMap.get(DcMotorEx.class, "wheelBR");
 
         //Magazine servos initialization
-        elevate = hardwareMap.get(Servo.class, "elevate");
-        rotate = hardwareMap.get(Servo.class, "rotate");
+    //    elevate = hardwareMap.get(Servo.class, "elevate");
+    //    rotate = hardwareMap.get(Servo.class, "rotate");
 
         //Distance sensor initialization
-        distanceSensorFront = hardwareMap.get(DistanceSensor.class, "distanceUno");
-        distanceSensorBack = hardwareMap.get(DistanceSensor.class, "distanceDos");
+        distanceSensorFront = hardwareMap.get(DistanceSensor.class, "distanceSensorFront");
+        distanceSensorBack = hardwareMap.get(DistanceSensor.class, "distanceSensorBack");
 
         telemetry.addData("Status", "Initialized and Ready");
 
+
+    }
+    
+    
 	// loop variables
 	int distanceCycle = 0;
-	int distanceFront;
-	int distanceBack;
-	int[100] arrayFront;
-	int[100] arrayFront;
-    }
-
+	double distanceFront;
+	double distanceBack;
+	double[] arrayFront = new double[10];
+	double[] arrayBack = new double[10];
+	
     @Override
     //Methods that will be called and be forever running during teleop
     public void loop() {
-        drive();
-        ariseElevator();
-        rotationManual();
-	avgDistances;
+        // drive();
+        // ariseElevator();
+        // rotationManual();
+	    avgDistances();
         //rotationAutomatic();
         //launch();
     }
@@ -91,32 +94,31 @@ public class mallardDrive extends OpMode {
             elevate.setPosition(0.5);
         }
     }    
-    public void getAverageReading (DistanceSensor) { // in mm
-            for (int i = 0; i < 99; i++) {
-                readings += distanceUno.getDistance(DistanceUnit.MM);
-            }
-            return readings / 100;
-
+    
+    
     public void avgDistances()
     {
-      dsb = distanceSensorBack;
-      dsf = distanceSensorFront;
+      DistanceSensor dsb = distanceSensorBack;
+      DistanceSensor dsf = distanceSensorFront;
 
       arrayFront[distanceCycle] = dsf.getDistance(DistanceUnit.MM);
       arrayBack[distanceCycle] = dsb.getDistance(DistanceUnit.MM);
 
       distanceCycle++;
 
-      if (distanceCycle > 99) { distanceCycle = 0 } 
+      if (distanceCycle > 9) { distanceCycle = 0; } 
 
       distanceFront = getAvg(arrayFront);
       distanceBack = getAvg(arrayBack);
 
-      telemetry.addData("Distance Front: ", distanceFront);
-      telemetry.addData("Distance Back: ", distanceBack);
+      telemetry.addData("Distance Front: ", distanceFront + "mm");
+      telemetry.addData("Distance Back: ", distanceBack + "mm");
+      telemetry.addData("Distance no algorithm Front: ", distanceSensorFront.getDistance(DistanceUnit.MM) + "mm");
+      telemetry.addData("Distance no algorithm Back: ", distanceSensorBack.getDistance(DistanceUnit.MM) + "mm");
+      
     }
 
-    public double getAvg(int[] list)
+    public double getAvg(double[] list)
     {
       int sum = 0;
       for (int i = 0; i < list.length; i++)
@@ -125,9 +127,6 @@ public class mallardDrive extends OpMode {
       }
       return sum / list.length;
     }
-
-        }
-    }    
     public void rotationManual(){
         // rotateButton = gamepad1.b;
 
