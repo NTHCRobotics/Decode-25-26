@@ -18,11 +18,11 @@ public class mallardDrive extends OpMode {
     //Setting variables for motors and servos
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR;
     private Servo elevate, rotate;
-    int readings;
     private DistanceSensor distanceSensorFront, distanceSensorBack;
 
     @Override
     public void init() {
+
         telemetry.addData("Status", "Initialization Started");
 
         //Movement wheels initialization
@@ -81,21 +81,13 @@ public class mallardDrive extends OpMode {
     }
     public void ariseElevator() {
         // ascendButton = gamepad1.y;
-        // descendButton = gamepad1.a;
 
-        if (gamepad1.y) {
-            elevate.setPosition(0.1);
-        } else if (gamepad1.a) {
-            elevate.setPosition(0.9);
-        } else {
+        if (gamepad1.y){
             elevate.setPosition(0.5);
+        } else {
+            elevate.setPosition(0.0);
         }
-    }    
-    public void getAverageReading (DistanceSensor) { // in mm
-            for (int i = 0; i < 99; i++) {
-                readings += distanceUno.getDistance(DistanceUnit.MM);
-            }
-            return readings / 100;
+    }
 
     public void avgDistances()
     {
@@ -126,27 +118,22 @@ public class mallardDrive extends OpMode {
       return sum / list.length;
     }
 
-        }
-    }    
     public void rotationManual(){
         // rotateButton = gamepad1.b;
 
-//        telemetry.addData("deviceName", distanceSensorFront.getDeviceName() );
-//        telemetry.addData("range", String.format("%.01f mm", (distanceSensorBack));
-//        telemetry.addData("deviceName", distanceSensorBack.getDeviceName() );
-//        telemetry.addData("range", String.format("%.01f mm", distanceSensorBack.getDistance(DistanceUnit.MM)));
+        telemetry.addData("deviceName", distanceSensorFront.getDeviceName() );
+        telemetry.addData("range", String.format("%.01f mm", (distanceSensorBack));
+        telemetry.addData("deviceName", distanceSensorBack.getDeviceName() );
+        telemetry.addData("range", String.format("%.01f mm", distanceSensorBack.getDistance(DistanceUnit.MM)));
 
         if (gamepad1.b){
-            rotate.setPosition(0.9);
+            rotate.setPosition(0.5);
         } else if (distanceSensorFront.getDistance(DistanceUnit.MM) > 0) {
             rotate.setPosition(0.0);
         }
     }
     public void launch(){
-        //put color sensor stuff here ugh
-
         // launchTrigger = gamepad1.right_trigger;
-        
 
     }
 
