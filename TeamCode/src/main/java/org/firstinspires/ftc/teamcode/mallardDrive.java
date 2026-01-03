@@ -9,44 +9,57 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp (name = "mallardDrive", group = "Axolotl")
-public class mallardDrive {
+public class mallardDrive extends OpMode {
 
+    //Setting variables for motors and servos
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR;
     private Servo elevate, rotate;
+    private DistanceSensor distanceUno, distanceDos;
 
     @Override
     public void init() {
         telemetry.addData("Status", "Initialization Started");
 
-        //Movement Wheels Initialization
+        //Movement wheels initialization
         wheelFL = hardwareMap.get(DcMotorEx.class, "wheelFL");
         wheelFR = hardwareMap.get(DcMotorEx.class, "wheelFR");
         wheelBL = hardwareMap.get(DcMotorEx.class, "wheelBL");
         wheelBR = hardwareMap.get(DcMotorEx.class, "wheelBR");
 
+        //Magazine servos initialization
         elevate = hardwareMap.get(Servo.class, "elevate");
         rotate = hardwareMap.get(Servo.class, "rotate");
+
+        //Distance sensor initialization
+        distanceUno = hardwareMap.get(DistanceSensor.class, "distanceUno");
+        distanceDos = hardwareMap.get(DistanceSensor.class, "distanceDos");
 
         telemetry.addData("Status", "Initialized and Ready");
     }
 
     @Override
-    // Methods that will be initialized and be forever running during teleop
+    //Methods that will be called and be forever running during teleop
     public void loop() {
         drive();
         ariseElevator();
         rotationManual();
+        //rotationAutomatic();
         //launch();
     }
-
+    //Methods
     public void drive() {
+        //Setting variables for x and y (and rotation) axis positions on controller sticks
         double x = -gamepad1.left_stick_x;
         double y = gamepad1.left_stick_y;
         double rotation = -gamepad1.right_stick_x;
 
+        //Speed that motors run (half the speed they would originally run)
         double speedMod = 0.5;
+        //Variables that calculate the speed each wheel goes (allows for turning and strafing)
         double FL = (-x - y - rotation) * speedMod;
         double FR = (-x + y - rotation) * speedMod;
         double BL = ( x - y - rotation) * speedMod;
@@ -65,14 +78,18 @@ public class mallardDrive {
         } else {
             elevate.setPosition(0.0);
         }
-
     }
     public void rotationManual(){
         // rotateButton = gamepad1.b;
 
+        telemetry.addData("deviceName", distanceUno.getDeviceName() );
+        telemetry.addData("range", String.format("%.01f mm", distanceUno.getDistance(DistanceUnit.MM)));
+        telemetry.addData("deviceName", distanceDos.getDeviceName() );
+        telemetry.addData("range", String.format("%.01f mm", distanceDos.getDistance(DistanceUnit.MM)));
+
         if (gamepad1.b){
             rotate.setPosition(0.5);
-        } else {
+        } else if (distanceUno > 0) {
             rotate.setPosition(0.0);
         }
     }
@@ -82,3 +99,4 @@ public class mallardDrive {
     }
 
 }
+
