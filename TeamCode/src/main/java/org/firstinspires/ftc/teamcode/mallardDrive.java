@@ -22,6 +22,7 @@ public class mallardDrive extends OpMode {
 
     @Override
     public void init() {
+
         telemetry.addData("Status", "Initialization Started");
 
         //Movement wheels initialization
@@ -79,17 +80,30 @@ public class mallardDrive extends OpMode {
             elevate.setPosition(0.0);
         }
     }
+
+    public void getAverageReading(DistanceSensor sensor) // In mm
+    {
+      int readings;
+      for (i = 0; i < 99; i++;)
+      {
+	readings += sensor.getDistance(DistanceUnit.MM);
+      }
+      return readings / 100;
+      
+    
+    }
+
     public void rotationManual(){
         // rotateButton = gamepad1.b;
 
         telemetry.addData("deviceName", distanceUno.getDeviceName() );
-        telemetry.addData("range", String.format("%.01f mm", distanceUno.getDistance(DistanceUnit.MM)));
+        telemetry.addData("range", String.format("%.01f mm", getAverageReading(distanceDos));
         telemetry.addData("deviceName", distanceDos.getDeviceName() );
         telemetry.addData("range", String.format("%.01f mm", distanceDos.getDistance(DistanceUnit.MM)));
 
         if (gamepad1.b){
             rotate.setPosition(0.5);
-        } else if (distanceUno > 0) {
+        } else if (distanceUno.getDistance(DistanceUnit.MM) > 0) {
             rotate.setPosition(0.0);
         }
     }
