@@ -25,7 +25,7 @@ public class mallardDrive extends OpMode {
     int readings;
     private DistanceSensor distanceSensorFront, distanceSensorBack;
 
-    NormalizedColorSensor colorSensor;
+    NormalizedColorSensor colorSensorLeft, colorSensorRight;
 
     @Override
     public void init() {
@@ -46,8 +46,11 @@ public class mallardDrive extends OpMode {
         //distanceSensorBack = hardwareMap.get(DistanceSensor.class, "distanceSensorBack");
 
         //Color sensor initialization
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
-        colorSensor.setGain(35);
+        colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, "colorSensorLeft");
+        colorSensorLeft.setGain(35);
+
+        colorSensorRight  = hardwareMap.get(NormalizedColorSensor.class, "colorSensorRight");
+        colorSensorRight.setGain(35);
 
         telemetry.addData("Status", "Initialized and Ready");
 
@@ -68,20 +71,12 @@ public class mallardDrive extends OpMode {
         // rotationManual();
         //avgDistances();
         getDetectedColor();
+        getDetectedColorRight();
         //rotationAutomatic();
         //launch();
     }
 
     //Methods
-
-    public enum DetectedColor {
-        PURPLE,
-
-        GREEN,
-
-        UNKNOWN
-    }
-
     public void drive() {
         //Setting variables for x and y (and rotation) axis positions on controller sticks
         double x = -gamepad1.left_stick_x;
@@ -91,10 +86,10 @@ public class mallardDrive extends OpMode {
         //Speed that motors run (half the speed they would originally run)
         double speedMod = 0.5;
         //Variables that calculate the speed each wheel goes (allows for turning and strafing)
-        double FL = (-x - y - rotation) * speedMod;
-        double FR = (-x + y - rotation) * speedMod;
+        double FL = ( x + y + rotation) * speedMod;
+        double FR = ( x - y + rotation) * speedMod;
         double BL = ( x - y - rotation) * speedMod;
-        double BR = ( x + y - rotation) * speedMod;
+        double BR = ( -x - y + rotation) * speedMod;
 
         wheelFL.setPower(FL);
         wheelFR.setPower(FR);
@@ -167,26 +162,54 @@ public class mallardDrive extends OpMode {
     }
     public void getDetectedColor(){
         //return 4 values in percentages (red, green, blue, alpha(brightness))
-        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+        NormalizedRGBA colors = colorSensorLeft.getNormalizedColors();
+        //colors = colorSensorRight.getNormalizedColors();
 
-        float normRed, normGreen, normBlue;
-        normRed = colors.red / colors.alpha;
-        normGreen = colors.green / colors.alpha;
-        normBlue = colors.blue / colors.alpha;
+        float leftRed, leftGreen, leftBlue;
+        leftRed = colors.red / colors.alpha;
+        leftGreen = colors.green / colors.alpha;
+        leftBlue = colors.blue / colors.alpha;
 
-        telemetry.addData("Red", normRed);
-        telemetry.addData("Green", normGreen);
-        telemetry.addData("Blue", normBlue);
+        telemetry.addData("Red", leftRed);
+        telemetry.addData("Green", leftGreen);
+        telemetry.addData("Blue", leftBlue);
 
         // purple = .2142, .2683, .366
         // green = .1275, .4153, .3023
 
-        if (normRed > .20 && normGreen < .27 && normBlue > .36){
-            telemetry.addData("Color Detected", "PURPLE");
-        } else if (normRed < .13 && normGreen > .41 && normBlue < .31){
-            telemetry.addData("Color Detected", "GREEN");
+        if (leftRed > .20 && leftGreen < .27 && leftBlue > .36){
+            telemetry.addData("Color detected LEFT", "PURPLE");
+        } else if (leftRed < .13 && leftGreen > .4 && leftBlue < .34){
+            telemetry.addData("Color detected LEFT", "GREEN");
         } else {
-            telemetry.addData("Color Detected", "NONE");
+            telemetry.addData("Color detected LEFT", "NONE");
+        }
+
+    }
+
+    public void getDetectedColorRight(){
+        //return 4 values in percentages (red, green, blue, alpha(brightness))
+        NormalizedRGBA colors = colorSensorRight.getNormalizedColors();
+        //colors = colorSensorRight.getNormalizedColors();
+
+        float rightRed, rightGreen, rightBlue;
+        rightRed = colors.red / colors.alpha;
+        rightGreen = colors.green / colors.alpha;
+        rightBlue = colors.blue / colors.alpha;
+
+        telemetry.addData("Red", rightRed);
+        telemetry.addData("Green", rightGreen);
+        telemetry.addData("Blue", rightBlue);
+
+        // purple = .2142, .2683, .366
+        // green = .1275, .4153, .3023
+
+        if (rightRed > .20 && rightGreen < .27 && rightBlue > .36){
+            telemetry.addData("Color detected RIGHT", "PURPLE");
+        } else if (rightRed < .13 && rightGreen > .4 && rightBlue < .34){
+            telemetry.addData("Color detected RIGHT", "GREEN");
+        } else {
+            telemetry.addData("Color detected RIGHT", "NONE");
         }
     }
 
