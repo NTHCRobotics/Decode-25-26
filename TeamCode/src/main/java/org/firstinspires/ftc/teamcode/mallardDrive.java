@@ -160,7 +160,7 @@ public class mallardDrive extends OpMode {
         // launchTrigger = gamepad1.right_trigger;
 
     }
-    public void getDetectedColor(){
+    public String getDetectedColor(){
         //return 4 values in percentages (red, green, blue, alpha(brightness))
         NormalizedRGBA colors = colorSensorLeft.getNormalizedColors();
         //colors = colorSensorRight.getNormalizedColors();
@@ -179,15 +179,18 @@ public class mallardDrive extends OpMode {
 
         if (leftRed > .20 && leftGreen < .27 && leftBlue > .36){
             telemetry.addData("Color detected LEFT", "PURPLE");
+	    return "purple";
         } else if (leftRed < .13 && leftGreen > .4 && leftBlue < .34){
             telemetry.addData("Color detected LEFT", "GREEN");
+	    return "green";
         } else {
             telemetry.addData("Color detected LEFT", "NONE");
+	    return "other";
         }
 
     }
 
-    public void getDetectedColorRight(){
+    public String getDetectedColorRight(){
         //return 4 values in percentages (red, green, blue, alpha(brightness))
         NormalizedRGBA colors = colorSensorRight.getNormalizedColors();
         //colors = colorSensorRight.getNormalizedColors();
@@ -206,10 +209,13 @@ public class mallardDrive extends OpMode {
 
         if (rightRed > .20 && rightGreen < .27 && rightBlue > .36){
             telemetry.addData("Color detected RIGHT", "PURPLE");
+	    return "purple";
         } else if (rightRed < .13 && rightGreen > .4 && rightBlue < .34){
             telemetry.addData("Color detected RIGHT", "GREEN");
+	    return "green";
         } else {
             telemetry.addData("Color detected RIGHT", "NONE");
+	    return "other";
         }
     }
 
