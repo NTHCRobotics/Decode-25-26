@@ -27,7 +27,15 @@ public class mallardDrive extends OpMode {
 
     NormalizedColorSensor colorSensorLeft, colorSensorRight;
 
-    @Override
+    // Color sensor variables
+    private final ColorMatch colorMatcher = new ColorMatch();
+
+    private final Color kBlueTarget = new Color(0.143, 0.427, 0.429);
+    private final Color kGreenTarget = new Color(0.197, 0.561, 0.240);
+    private final Color kRedTarget = new Color(0.561, 0.232, 0.114);
+    private final Color kYellowTarget = new Color(0.361, 0.524, 0.113);
+
+    
     public void init() {
         telemetry.addData("Status", "Initialization Started");
 
@@ -46,11 +54,19 @@ public class mallardDrive extends OpMode {
         //distanceSensorBack = hardwareMap.get(DistanceSensor.class, "distanceSensorBack");
 
         //Color sensor initialization
+        //colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, "colorSensorLeft");
         colorSensorLeft = hardwareMap.get(NormalizedColorSensor.class, "colorSensorLeft");
         colorSensorLeft.setGain(35);
 
-        colorSensorRight  = hardwareMap.get(NormalizedColorSensor.class, "colorSensorRight");
+        //colorSensorRight = hardwareMap.get(NormalizedColorSensor.class, "colorSensorRight");
+	colorSensorRight  = hardwareMap.get(ColorSensorV3.class, "colorSensorRight");
         colorSensorRight.setGain(35);
+
+        colorMatcher.addColorMatch(kBlueTarget);
+        colorMatcher.addColorMatch(kGreenTarget);
+        colorMatcher.addColorMatch(kRedTarget);
+        colorMatcher.addColorMatch(kYellowTarget);
+
 
         telemetry.addData("Status", "Initialized and Ready");
 
@@ -217,6 +233,37 @@ public class mallardDrive extends OpMode {
             telemetry.addData("Color detected RIGHT", "NONE");
 	    return "other";
         }
+    }
+
+    public String getColorOmar( ColorSensorV3 funcSensor )
+    {
+      Color detectedColor = funcSensor.getColor();
+      String colorString;
+      ColorMatchResult match = colorMatcher.matchClosestColor(detectedColor);
+
+      if (match.color == kBlueTarget) {
+        colorString = "Blue";
+      }
+      else if (match.color == kRedTarget) {
+        colorString = "Red";
+      } 
+      else if (match.color == kGreenTarget) {
+        colorString = "Green";
+      } 
+      else if (match.color == kYellowTarget) {
+        colorString = "Yellow";
+      } 
+      else {
+        colorString = "Unknown";
+      }
+
+
+    telemetry.addData.putNumber("Red", detectedColor.red);
+    telemetry.addData.putNumber("Green", detectedColor.green);
+    telemetry.addData.putNumber("Blue", detectedColor.blue);
+    telemetry.addData.putNumber("Confidence", match.confidence);
+    telemetry.addData.putString("Detected Color", colorString);
+
     }
 
 }
