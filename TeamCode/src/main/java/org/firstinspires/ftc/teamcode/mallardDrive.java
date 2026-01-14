@@ -16,11 +16,15 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import com.revrobotics.ColorSensorV3;
+import com.revrobotics.ColorMatchResult;
+import com.revrobotics.ColorMatch;
+
 @TeleOp (name = "mallardDrive", group = "Axolotl")
 public class mallardDrive extends OpMode {
 
     //Setting variables for motors and servos
-    private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR;
+    private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB;
     private Servo elevate, rotate;
     int readings;
     private DistanceSensor distanceSensorFront, distanceSensorBack;
@@ -44,6 +48,10 @@ public class mallardDrive extends OpMode {
         //   wheelFR = hardwareMap.get(DcMotorEx.class, "wheelFR");
         //   wheelBL = hardwareMap.get(DcMotorEx.class, "wheelBL");
         //   wheelBR = hardwareMap.get(DcMotorEx.class, "wheelBR");
+
+        //Intake initialization
+
+        intakeB = hardwareMap.get(DcMotorEx.class, "intakeB");
 
         //Magazine servos initialization
         //    elevate = hardwareMap.get(Servo.class, "elevate");
@@ -90,6 +98,7 @@ public class mallardDrive extends OpMode {
         getDetectedColorRight();
         //rotationAutomatic();
         //launch();
+        spinIntakes();
     }
 
     //Methods
@@ -111,6 +120,10 @@ public class mallardDrive extends OpMode {
         wheelFR.setPower(FR);
         wheelBL.setPower(BL);
         wheelBR.setPower(BR);
+    }
+
+    public void spinIntakes() {
+        intakeB.setPower(0.5);
     }
     public void ariseElevator() {
         // ascendButton = gamepad1.y;
