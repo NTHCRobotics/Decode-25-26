@@ -55,10 +55,8 @@ public class mainDrive extends OpMode{
     @Override
     public void loop(){
         drive(); // translation and rotation
-
+        //spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
         updateTelemetry(); // updates driver's hub telemetry
-
-
     }
 
     //Custom Classes
@@ -83,6 +81,10 @@ public class mainDrive extends OpMode{
         wheelFR.setPower(FR);
         wheelBL.setPower(BL);
         wheelBR.setPower(BR);
+    }
+    //Intake control
+    public void spinIntakes() {
+        intakeB.setPower(0.5);
     }
 
     //Color sensor
