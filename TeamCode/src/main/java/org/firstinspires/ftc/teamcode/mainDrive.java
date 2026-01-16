@@ -2,11 +2,18 @@ package org.firstinspires.ftc.teamcode;
 //IMPORTS
 import static java.lang.Thread.sleep;
 
+import android.util.Size;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 
@@ -19,10 +26,15 @@ public class mainDrive extends OpMode{
     private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
 //    private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
 
+    //April Tag + Vision Portal stuff
+    AprilTagProcessor aprilTagProcessor;
+    VisionPortal visionPortal;
+
 
 
     //Variables
     double speedMod = 0.5; //Speed of wheel motors (around 1/2 maximum rate)
+    double aprilTagReadAttempts = 0;
     double[] magazineReadPositions = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
     // !IMPORTANT! artifactOrder is an ArrayList since it needs to be repeatedly scanned and edited.
     // 0 --> L, 1 --> BR, 2 --> FR
@@ -48,14 +60,32 @@ public class mainDrive extends OpMode{
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
 //        colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
 
-        //Initialization
-        magazineServo.setPosition(0.0);
-        loadServo.setPosition(0.0);
-
         //Initialize magazine orders will null (so size = 3)
         magazineOrder.add("empty");
         magazineOrder.add("empty");
         magazineOrder.add("empty");
+
+        //Initialize AprilTag Detection
+        aprilTagProcessor = new AprilTagProcessor.Builder()
+                //Settings here
+                .build();
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam1"))
+                .addProcessor(aprilTagProcessor)
+                .setCameraResolution(new Size(640, 480))
+                .build();
+
+
+        //Initialization
+        magazineServo.setPosition(0.0);
+        loadServo.setPosition(0.0);
+
+        //AprilTag detection
+        try {
+            obeliskOrder = detectObelisk();
+        } catch (InterruptedException e) {
+            obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES
+        }
 
     }
 
@@ -140,6 +170,34 @@ public class mainDrive extends OpMode{
 
     public void updateTelemetry() {
         telemetry.addData("Magazine Order", magazineOrder.get(0) + " " + magazineOrder.get(1) + " " + magazineOrder.get(2));
+    }
+
+    public String[] detectObelisk() throws InterruptedException {
+        AprilTagDetection obeliskDetection = aprilTagProcessor.getDetections().get(0); //Gets the first detection of an apriltag, should only be the center one
+        if (obeliskDetection == null) {
+            if (aprilTagReadAttempts < 100) { //100 is working maximum read attempts before giving up, total of 10 seconds of processing every 0.1 seconds.
+                aprilTagReadAttempts++;
+                sleep(100);
+                return detectObelisk();
+            }
+            else {
+                return new String[]{"green", "purple", "purple"}; //DEFAULT CATCH IN CASE OF EXCEPTIONS
+            }
+        }
+        else {
+            int id = obeliskDetection.id;
+            switch (id) {
+                case 21:
+                    return new String[]{"green", "purple", "purple"};
+                case 22:
+                    return new String[]{"purple", "green", "purple"};
+                case 23:
+                    return new String[]{"purple", "purple", "green"};
+                default:
+                    return new String[]{"green", "purple", "purple"}; //DEFAULT CATCH IN CASE OF EXCEPTIONS
+            }
+        }
+
     }
 
 }
