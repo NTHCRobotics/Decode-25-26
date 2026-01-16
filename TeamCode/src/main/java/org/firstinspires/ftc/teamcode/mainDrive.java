@@ -17,7 +17,7 @@ public class mainDrive extends OpMode{
     private Servo magazineServo, loadServo; //Servos
     private NormalizedColorSensor colorSensorL; //Left Color Sensor
     private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
-    private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
+//    private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
 
 
 
@@ -46,7 +46,7 @@ public class mainDrive extends OpMode{
         //Sensors
         colorSensorL = hardwareMap.get(NormalizedColorSensor.class, "colorSensorL");
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
-        colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
+//        colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
 
         //Initialization
         magazineServo.setPosition(0.0);
@@ -121,11 +121,11 @@ public class mainDrive extends OpMode{
     public void indexArtifacts() {
         String colorL = colorMatch(colorSensorL);
         String colorBR = colorMatch(colorSensorBR);
-        String colorFR = colorMatch(colorSensorFR);
+//        String colorFR = colorMatch(colorSensorFR);
 
         magazineOrder.set(0, colorL);
         magazineOrder.set(1, colorBR);
-        magazineOrder.set(2, colorFR);
+//        magazineOrder.set(2, colorFR);
     }
 
     public void launchInOrder() throws InterruptedException {
