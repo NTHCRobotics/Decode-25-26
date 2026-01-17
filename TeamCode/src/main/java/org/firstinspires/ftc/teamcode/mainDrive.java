@@ -36,6 +36,8 @@ public class mainDrive extends OpMode{
     double speedMod = 0.5; //Speed of wheel motors (around 1/2 maximum rate)
     double aprilTagReadAttempts = 1;
     double[] magazineReadPositions = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
+    double[] loadServoPositions = {0.0, 90.0/300}; // Omar said 90 degrees sooooooooooo
+
     // !IMPORTANT! artifactOrder is an ArrayList since it needs to be repeatedly scanned and edited.
     // 0 --> L, 1 --> BR, 2 --> FR
     ArrayList<String> magazineOrder = new ArrayList<String>(); //correlates to the artifact color currently in readPositions (e.g. the artifacts in the magazine)
@@ -62,7 +64,7 @@ public class mainDrive extends OpMode{
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
         colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
 
-        //Initialize magazine orders will null (so size = 3)
+        //Initialize magazine orders with null (so size = 3)
         magazineOrder.add("empty");
         magazineOrder.add("empty");
         magazineOrder.add("empty");
@@ -93,10 +95,12 @@ public class mainDrive extends OpMode{
 
     @Override
     public void init_loop(){
-        try { //TRY/CATCH BECAUSE IT'S REQUIRED WHEN USING SLEEP()
-            obeliskOrder = detectObelisk() == null ? detectObelisk() : obeliskOrder; //Kinda weird, will replace later, if detectObelisk() returns null, it ignores it and keeps whatever the last value was.
-        } catch (InterruptedException e) {
-            obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES RATHER THAN THROWING A RANDOM ERROR. IT'S RIGHT 33.33% OF THE TIME AT LEAST
+        if (!gamepad2.dpad_down) { // Safe initialization mode for redundancy, holding gamepad2 dpad down while passing from init_loop() to loop() will prevent the AprilTag processor from running.
+            try { //TRY/CATCH BECAUSE IT'S REQUIRED WHEN USING SLEEP()
+                obeliskOrder = detectObelisk() == null ? detectObelisk() : obeliskOrder; //Kinda weird, will replace later, if detectObelisk() returns null, it ignores it and keeps whatever the last value was.
+            } catch (InterruptedException e) {
+                obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES RATHER THAN THROWING A RANDOM ERROR. IT'S RIGHT 33.33% OF THE TIME AT LEAST
+            }
         }
         updateInitTelemetry();
     }
@@ -106,7 +110,7 @@ public class mainDrive extends OpMode{
         drive(); // translation and rotation
         //spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
         indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
-        launchArtifactManual();
+        launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
         updateTelemetry();
     }
     //Custom Classes
@@ -137,7 +141,7 @@ public class mainDrive extends OpMode{
         // change magazine order = the dpad brah
         // move elevator up = right bumper
         // move fly wheels = right trigger ya
-        // setposition double is degree so like 1 is 180 and 0.5 is 90
+        // setposition double is degree so like 1 is 180 and 0.5 is 90 <-- This is not true, you're probably thinking of radians since 180 is (pi) and 90 is (pi)/2. Unfortunately, our servos are [0, 1] between [0, 300] degrees
         // degrees vary cause idk them
 
         //Fixed your degrees, Danya. Also, left is 0, up is 1, and right is 2.
@@ -152,9 +156,9 @@ public class mainDrive extends OpMode{
 
         //Idk if these are the right values for the launcher but I'm going to assume they are.
         if (gamepad2.right_bumper){
-            loadServo.setPosition(1);
+            loadServo.setPosition(loadServoPositions[1]);
         } else {
-            loadServo.setPosition(0.02);
+            loadServo.setPosition(loadServoPositions[0]);
         }
 
         double triggerValue = gamepad2.right_trigger;
@@ -216,10 +220,17 @@ public class mainDrive extends OpMode{
 
     public void launchInOrder() throws InterruptedException {
         for (int i = 0; i < 3; i++){
+            //Explanation: for each ball in the magazine, match its position with an index in the obelisk order, set position to the [i]th ball, load it, then retract and move onto the next.
             int index = magazineOrder.indexOf(obeliskOrder[i]);
+            if (index == -1){
+                continue; //Skip to the next part if it can't find the ball
+            }
             magazineServo.setPosition(magazineReadPositions[index]);
             sleep(200); //Allows for the magazine to rotate
-            //LAUNCH CODE HERE
+            loadServo.setPosition(loadServoPositions[1]);
+            sleep(1000);
+            loadServo.setPosition(loadServoPositions[0]);
+            sleep(100);
             magazineOrder.set(i, "empty");
         }
     }
