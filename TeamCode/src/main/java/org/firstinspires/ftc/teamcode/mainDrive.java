@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class mainDrive extends OpMode{
     //Hardware
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, flyWheelA, flyWheelB; //Motors
-    private Servo magazineServo, loadServo; //Servos
+    private Servo magazineServo, loadServo hoodServo; //Servos
     private NormalizedColorSensor colorSensorL; //Left Color Sensor
     private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
     private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
@@ -63,6 +63,7 @@ public class mainDrive extends OpMode{
         //Servos
         magazineServo = hardwareMap.get(Servo.class, "magazineServo");
         loadServo = hardwareMap.get(Servo.class, "loadServo");
+        loadServo = hardwareMap.get(Servo.class, "hoodServo");
         //Sensors
         colorSensorL = hardwareMap.get(NormalizedColorSensor.class, "colorSensorL");
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
@@ -113,6 +114,7 @@ public class mainDrive extends OpMode{
     public void loop(){
         drive(); // translation and rotation
         spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
+        aim();
         //indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
         updateTelemetry();
@@ -149,6 +151,29 @@ public class mainDrive extends OpMode{
         wheelFR.setPower(FR);
         wheelBL.setPower(BL);
         wheelBR.setPower(BR);
+    }
+
+    public void aim()
+    {
+      double x = -gamepad1.left_stick_x;
+      double y = gamepad1.left_stick_y;
+
+      if (x > 0)
+      {
+        hoodServo.setPosition(180);
+      }
+      else if (x < 0)
+      {
+        hoodServo.setPosition(0);
+      }
+      else
+      {
+        hoodServo.setPosition(90);
+      }
+
+
+
+
     }
 
     public void launchArtifactManual(){
