@@ -132,11 +132,11 @@ public class mainDrive extends OpMode{
 
         if (x + y > 0 && !movingElevator)
         {
-          elevator.setPosition(5); //Slightly off the ground
+          loadServo.setPosition(5); //Slightly off the ground
         }
         else if (x + y == 0 && !movingElevator)
         {
-          elevator.setPosition(0);
+          loadSevo.setPosition(0);
         }
 
         //Wheel-by-wheel spin calculations
