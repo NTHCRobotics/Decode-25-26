@@ -53,7 +53,10 @@ public class mainDrive extends OpMode{
         wheelFR = hardwareMap.get(DcMotorEx.class, "wheelFR");
         wheelBL = hardwareMap.get(DcMotorEx.class, "wheelBL");
         wheelBR = hardwareMap.get(DcMotorEx.class, "wheelBR");
+
+
         intakeB = hardwareMap.get(DcMotorEx.class, "intakeB");
+
         flyWheelA = hardwareMap.get(DcMotorEx.class, "flyWheelA");
         flyWheelB = hardwareMap.get(DcMotorEx.class, "flyWheelB");
         //Servos
@@ -154,16 +157,14 @@ public class mainDrive extends OpMode{
             magazineServo.setPosition(magazineReadPositions[2]);
         }
 
-        //Idk if these are the right values for the launcher but I'm going to assume they are.
+        //Omar said 0 to 90 degrees so blame him if it doesn't work.
         if (gamepad2.right_bumper){
             loadServo.setPosition(loadServoPositions[1]);
         } else {
             loadServo.setPosition(loadServoPositions[0]);
         }
 
-        double triggerValue = gamepad2.right_trigger;
-
-        if (triggerValue > 0.1) {
+        if (gamepad2.right_trigger > 0.1) {
             flyWheelA.setPower(1);
             flyWheelB.setPower(1);
         } else {

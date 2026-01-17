@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import java.lang.Math;
 
+//This code exists solely to test if apriltags can be identified. It's not competition-ready code.
 @TeleOp()
 public class colorMatch extends OpMode{
     //HARDWARE SETUP:

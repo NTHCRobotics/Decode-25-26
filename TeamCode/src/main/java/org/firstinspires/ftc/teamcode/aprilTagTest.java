@@ -17,7 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "APT", group = "Axolotl")
+@TeleOp(name = "ATT", group = "Axolotl")
 public class aprilTagTest extends OpMode{
 
     //April Tag + Vision Portal stuff
