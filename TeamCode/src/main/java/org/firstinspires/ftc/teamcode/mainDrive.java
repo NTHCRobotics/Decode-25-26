@@ -34,7 +34,7 @@ public class mainDrive extends OpMode{
 
     //Variables
     double speedMod = 0.5; //Speed of wheel motors (around 1/2 maximum rate)
-    double aprilTagReadAttempts = 0;
+    double aprilTagReadAttempts = 1;
     double[] magazineReadPositions = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
     // !IMPORTANT! artifactOrder is an ArrayList since it needs to be repeatedly scanned and edited.
     // 0 --> L, 1 --> BR, 2 --> FR
@@ -89,6 +89,17 @@ public class mainDrive extends OpMode{
             obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES
         }
 
+    }
+
+    @Override
+    public void init_loop(){
+        try {
+            obeliskOrder = detectObelisk();
+            sleep(100); //Sleep time so it probably won't crash with unnecessary reads. It reads throughout init regardless.
+        } catch (InterruptedException e) {
+            obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES RATHER THAN THROWING A RANDOM ERROR. IT'S RIGHT 33.33% OF THE TIME AT LEAST
+        }
+        updateTelemetry();
     }
 
     @Override
@@ -205,22 +216,16 @@ public class mainDrive extends OpMode{
 
     public void updateTelemetry() {
         telemetry.addData("Magazine Order", magazineOrder.get(0) + " " + magazineOrder.get(1) + " " + magazineOrder.get(2));
+        telemetry.addData("AprilTag Read Attempts", aprilTagReadAttempts);
+        telemetry.addData("Obelisk Order", obeliskOrder[0] + " " + obeliskOrder[1] + " " + obeliskOrder[2]);
     }
 
     public String[] detectObelisk() throws InterruptedException {
-        AprilTagDetection obeliskDetection = aprilTagProcessor.getDetections().get(0); //Gets the first detection of an apriltag, should only be the center one
-        if (obeliskDetection == null) {
-            if (aprilTagReadAttempts < 100) { //100 is working maximum read attempts before giving up, total of 10 seconds of processing every 0.1 seconds.
-                aprilTagReadAttempts++;
-                sleep(100);
-                return detectObelisk();
-            }
-            else {
-                return new String[]{"green", "purple", "purple"}; //DEFAULT CATCH IN CASE OF EXCEPTIONS
-            }
-        }
-        else {
-            int id = obeliskDetection.id;
+        ArrayList<AprilTagDetection> obeliskDetections = aprilTagProcessor.getDetections(); //Gets the first detection of an apriltag, should only be the center one
+        if (obeliskDetections.isEmpty()) {
+            return null;
+        } else {
+            int id = obeliskDetections.get(0).id; //Gets the first element, only ONE element should be in frame.
             switch (id) {
                 case 21:
                     return new String[]{"green", "purple", "purple"};
@@ -229,7 +234,7 @@ public class mainDrive extends OpMode{
                 case 23:
                     return new String[]{"purple", "purple", "green"};
                 default:
-                    return new String[]{"green", "purple", "purple"}; //DEFAULT CATCH IN CASE OF EXCEPTIONS
+                    throw new InterruptedException(); //REFERS TO DEFAULT FAILURE HANDLING IN CATCH/TRY
             }
         }
 
