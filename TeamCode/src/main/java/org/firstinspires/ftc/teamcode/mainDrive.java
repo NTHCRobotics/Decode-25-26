@@ -24,7 +24,7 @@ public class mainDrive extends OpMode{
     private Servo magazineServo, loadServo; //Servos
     private NormalizedColorSensor colorSensorL; //Left Color Sensor
     private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
-//    private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
+    private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
 
     //April Tag + Vision Portal stuff
     AprilTagProcessor aprilTagProcessor;
@@ -60,7 +60,7 @@ public class mainDrive extends OpMode{
         //Sensors
         colorSensorL = hardwareMap.get(NormalizedColorSensor.class, "colorSensorL");
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
-//        colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
+        colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
 
         //Initialize magazine orders will null (so size = 3)
         magazineOrder.add("empty");
@@ -93,13 +93,12 @@ public class mainDrive extends OpMode{
 
     @Override
     public void init_loop(){
-        try {
-            obeliskOrder = detectObelisk();
-            sleep(100); //Sleep time so it probably won't crash with unnecessary reads. It reads throughout init regardless.
+        try { //TRY/CATCH BECAUSE IT'S REQUIRED WHEN USING SLEEP()
+            obeliskOrder = detectObelisk() == null ? detectObelisk() : obeliskOrder; //Kinda weird, will replace later, if detectObelisk() returns null, it ignores it and keeps whatever the last value was.
         } catch (InterruptedException e) {
             obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES RATHER THAN THROWING A RANDOM ERROR. IT'S RIGHT 33.33% OF THE TIME AT LEAST
         }
-        updateTelemetry();
+        updateInitTelemetry();
     }
 
     @Override
@@ -108,7 +107,7 @@ public class mainDrive extends OpMode{
         //spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
         indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
         launchArtifactManual();
-        updateTelemetry(); // updates driver's hub telemetry
+        updateTelemetry();
     }
     //Custom Classes
     //Read obelisk
@@ -141,14 +140,17 @@ public class mainDrive extends OpMode{
         // setposition double is degree so like 1 is 180 and 0.5 is 90
         // degrees vary cause idk them
 
+        //Fixed your degrees, Danya. Also, left is 0, up is 1, and right is 2.
+
         if (gamepad2.dpad_left){
-            magazineServo.setPosition(0.6);
-        } else if (gamepad2.dpad_right){
-            magazineServo.setPosition(0.4);
+            magazineServo.setPosition(magazineReadPositions[0]);
         } else if (gamepad2.dpad_up){
-            magazineServo.setPosition(0.2);
+            magazineServo.setPosition(magazineReadPositions[1]);
+        } else if (gamepad2.dpad_right){
+            magazineServo.setPosition(magazineReadPositions[2]);
         }
 
+        //Idk if these are the right values for the launcher but I'm going to assume they are.
         if (gamepad2.right_bumper){
             loadServo.setPosition(1);
         } else {
@@ -172,21 +174,29 @@ public class mainDrive extends OpMode{
     }
 
     //Color sensor
-    public String colorMatch(NormalizedColorSensor colorSensor){
-        double red = colorSensor.getNormalizedColors().red;
-        double green = colorSensor.getNormalizedColors().green;
-        double blue = colorSensor.getNormalizedColors().blue;
+    public String colorMatch(NormalizedColorSensor colorSensor, double purpleTolerance, double greenTolerance, int steps){
+        double purpleSum = 0;
+        double greenSum = 0;
 
-        double purpleMatch = Math.max(0, Math.min(red, blue) - green - Math.abs(red - blue));
-        double greenMatch = Math.max(0, green - Math.max(red, blue));
+        for (int i = 0; i < steps; i++){ // Takes a rolling account of readings with a certain number of steps, time unbounded, to prevent one-off errors. Unlike AprilTags where the error is often blurred motion which requires a short wait time to fix, color sensors are just kinda jank so sampling right after is usually fine.
+            double red = colorSensor.getNormalizedColors().red;
+            double green = colorSensor.getNormalizedColors().green;
+            double blue = colorSensor.getNormalizedColors().blue;
 
-        double purpleTolerance = 0.5;
-        double greenTolerance = 0.5;
+            double purpleMatch = Math.max(0, Math.min(red, blue) - green - Math.abs(red - blue));
+            double greenMatch = Math.max(0, green - Math.max(red, blue));
 
-        if (purpleMatch < purpleTolerance && greenMatch < greenTolerance){
+            purpleSum += purpleMatch;
+            greenSum += greenMatch;
+        }
+
+        double purpleAvg = purpleSum / steps; // Determines the average percentage [0, 1] that whatever is scanned matches purple
+        double greenAvg = greenSum / steps; // Determines the average percentage [0, 1] that whatever is scanned matches green
+
+        if (purpleAvg < purpleTolerance && greenAvg < greenTolerance){
             return "empty";
         }
-        else if (purpleMatch > greenMatch){
+        else if (purpleAvg > greenAvg){
             return "purple";
         }
         else {
@@ -195,13 +205,13 @@ public class mainDrive extends OpMode{
     }
 
     public void indexArtifacts() {
-        String colorL = colorMatch(colorSensorL);
-        String colorBR = colorMatch(colorSensorBR);
-//        String colorFR = colorMatch(colorSensorFR);
+        String colorL = colorMatch(colorSensorL, 0.5, 0.5, 100);
+        String colorBR = colorMatch(colorSensorBR, 0.5, 0.5, 100);
+        String colorFR = colorMatch(colorSensorFR, 0.5, 0.5, 100);
 
         magazineOrder.set(0, colorL);
         magazineOrder.set(1, colorBR);
-//        magazineOrder.set(2, colorFR);
+        magazineOrder.set(2, colorFR);
     }
 
     public void launchInOrder() throws InterruptedException {
@@ -214,12 +224,20 @@ public class mainDrive extends OpMode{
         }
     }
 
-    public void updateTelemetry() {
+    public void updateInitTelemetry() {
         telemetry.addData("Magazine Order", magazineOrder.get(0) + " " + magazineOrder.get(1) + " " + magazineOrder.get(2));
         telemetry.addData("AprilTag Read Attempts", aprilTagReadAttempts);
         telemetry.addData("Obelisk Order", obeliskOrder[0] + " " + obeliskOrder[1] + " " + obeliskOrder[2]);
+        telemetry.update();
     }
 
+    public void updateTelemetry() {
+        telemetry.addData("Magazine Order", magazineOrder.get(0) + " " + magazineOrder.get(1) + " " + magazineOrder.get(2));
+        telemetry.addData("Wheel Powers", wheelFL.getPower() + "    " + wheelFR.getPower() + "\n"
+                                                      +wheelBL.getPower() + "     " + wheelBR.getPower()); //Hopefully this serves as a bit of a better display, remove if not.
+    }
+
+    // Scans the obelisk, returns either null for "can't see anything" and "ID out of range" or a 3-value String[] if it identifies an appropriate AprilTag code
     public String[] detectObelisk() throws InterruptedException {
         ArrayList<AprilTagDetection> obeliskDetections = aprilTagProcessor.getDetections(); //Gets the first detection of an apriltag, should only be the center one
         if (obeliskDetections.isEmpty()) {
@@ -234,7 +252,7 @@ public class mainDrive extends OpMode{
                 case 23:
                     return new String[]{"purple", "purple", "green"};
                 default:
-                    throw new InterruptedException(); //REFERS TO DEFAULT FAILURE HANDLING IN CATCH/TRY
+                    return null; //REFERS TO DEFAULT FAILURE HANDLING IN LOOP
             }
         }
 
