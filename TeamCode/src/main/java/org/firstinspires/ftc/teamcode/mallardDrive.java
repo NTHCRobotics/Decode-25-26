@@ -280,3 +280,7 @@
 //    }
 //
 //}
+<<<<<<< HEAD
+=======
+//
+>>>>>>> 2ee21e5 (Added safety elevator lift && leftover stuff)

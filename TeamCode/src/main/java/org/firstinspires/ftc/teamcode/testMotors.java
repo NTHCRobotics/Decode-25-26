@@ -20,12 +20,13 @@ import com.revrobotics.ColorSensorV3;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorMatch;
 
-@TeleOp (name = "mallardDrive", group = "Axolotl")
-public class mallardDrive extends OpMode {
+@TeleOp (name = "testMotors", group = "Axolotl")
+public class testMotors extends OpMode {
 
     //Setting variables for motors and servos
-    private DcMotorEx flyL flyR;
-    
+    private DcMotorEx flyL, flyR;
+    public boolean toggle = false;
+
     public void init() {
         telemetry.addData("Status", "Initialization Started");
 
@@ -41,20 +42,31 @@ public class mallardDrive extends OpMode {
     @Override
     //Methods that will be called and be forever running during teleop
     public void loop() {
-        spinIntakes();
+        spinFlywheels();
     }
 
     //Methods
-    public void spinFlywheels() 
-    {
+    public void spinFlywheels() {
       if (gamepad1.y)
       {
+          if (toggle)
+          {
+              toggle = false;
+          }
+          else
+          {
+              toggle = true;
+          }
+
+      }
+      if (toggle)
+      {
         flyL.setPower(1);
-        flyR.setPower(1);
+        flyR.setPower(-1);
       }
       else
       {
-        flyL.setPower(0)
-        flyR.setPower(0)
+        flyL.setPower(0);
+        flyR.setPower(0);
       }
-    }
+    }}

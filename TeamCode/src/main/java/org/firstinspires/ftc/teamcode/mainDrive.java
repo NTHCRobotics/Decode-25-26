@@ -37,6 +37,7 @@ public class mainDrive extends OpMode{
     double aprilTagReadAttempts = 1;
     double[] magazineReadPositions = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
     double[] loadServoPositions = {0.0, 90.0/300}; // Omar said 90 degrees sooooooooooo
+    boolean movingElevator = false;
 
     // !IMPORTANT! artifactOrder is an ArrayList since it needs to be repeatedly scanned and edited.
     // 0 --> L, 1 --> BR, 2 --> FR
@@ -111,11 +112,12 @@ public class mainDrive extends OpMode{
     @Override
     public void loop(){
         drive(); // translation and rotation
-        //spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
-        indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
+        spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
+        //indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
         updateTelemetry();
     }
+
     //Custom Classes
     //Read obelisk
     public void readObelisk() {
@@ -127,6 +129,15 @@ public class mainDrive extends OpMode{
         double x = -gamepad1.left_stick_x;
         double y = gamepad1.left_stick_y;
         double rotation = -gamepad1.right_stick_x;
+
+        if (x + y > 0 && !movingElevator)
+        {
+          elevator.setPosition(5); //Slightly off the ground
+        }
+        else if (x + y == 0 && !movingElevator)
+        {
+          elevator.setPosition(0);
+        }
 
         //Wheel-by-wheel spin calculations
         double FL = (-x - y - rotation) * speedMod;
@@ -149,19 +160,15 @@ public class mainDrive extends OpMode{
 
         //Fixed your degrees, Danya. Also, left is 0, up is 1, and right is 2.
 
-        if (gamepad2.dpad_left){
-            magazineServo.setPosition(magazineReadPositions[0]);
-        } else if (gamepad2.dpad_up){
-            magazineServo.setPosition(magazineReadPositions[1]);
-        } else if (gamepad2.dpad_right){
-            magazineServo.setPosition(magazineReadPositions[2]);
-        }
+        movingElevator = false;
 
         //Omar said 0 to 90 degrees so blame him if it doesn't work.
         if (gamepad2.right_bumper){
             loadServo.setPosition(loadServoPositions[1]);
+        movingElevator = true;
         } else {
             loadServo.setPosition(loadServoPositions[0]);
+        movingElevator = true;
         }
 
         if (gamepad2.right_trigger > 0.1) {
@@ -175,7 +182,14 @@ public class mainDrive extends OpMode{
 
     //Intake control
     public void spinIntakes() {
-        intakeB.setPower(0.5);
+        if( gamepad1.a)
+        {
+          intakeB.setPower(0.5);
+        }
+        else
+        {
+          intakeB.setPower(0);
+        }
     }
 
     //Color sensor
