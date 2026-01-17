@@ -20,7 +20,7 @@ import java.util.ArrayList;
 @TeleOp(name = "mainDrive", group = "Axolotl")
 public class mainDrive extends OpMode{
     //Hardware
-    private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB; //Motors
+    private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, flyWheelA, flyWheelB; //Motors
     private Servo magazineServo, loadServo; //Servos
     private NormalizedColorSensor colorSensorL; //Left Color Sensor
     private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
@@ -52,6 +52,8 @@ public class mainDrive extends OpMode{
         wheelBL = hardwareMap.get(DcMotorEx.class, "wheelBL");
         wheelBR = hardwareMap.get(DcMotorEx.class, "wheelBR");
         intakeB = hardwareMap.get(DcMotorEx.class, "intakeB");
+        flyWheelA = hardwareMap.get(DcMotorEx.class, "flyWheelA");
+        flyWheelB = hardwareMap.get(DcMotorEx.class, "flyWheelB");
         //Servos
         magazineServo = hardwareMap.get(Servo.class, "magazineServo");
         loadServo = hardwareMap.get(Servo.class, "loadServo");
@@ -94,9 +96,9 @@ public class mainDrive extends OpMode{
         drive(); // translation and rotation
         //spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
         indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
+        launchArtifactManual();
         updateTelemetry(); // updates driver's hub telemetry
     }
-
     //Custom Classes
     //Read obelisk
     public void readObelisk() {
@@ -120,6 +122,39 @@ public class mainDrive extends OpMode{
         wheelBL.setPower(BL);
         wheelBR.setPower(BR);
     }
+
+    public void launchArtifactManual(){
+        // change magazine order = the dpad brah
+        // move elevator up = right bumper
+        // move fly wheels = right trigger ya
+        // setposition double is degree so like 1 is 180 and 0.5 is 90
+        // degrees vary cause idk them
+
+        if (gamepad2.dpad_left){
+            magazineServo.setPosition(0.6);
+        } else if (gamepad2.dpad_right){
+            magazineServo.setPosition(0.4);
+        } else if (gamepad2.dpad_up){
+            magazineServo.setPosition(0.2);
+        }
+
+        if (gamepad2.right_bumper){
+            loadServo.setPosition(1);
+        } else {
+            loadServo.setPosition(0.02);
+        }
+
+        double triggerValue = gamepad2.right_trigger;
+
+        if (triggerValue > 0.1) {
+            flyWheelA.setPower(1);
+            flyWheelB.setPower(1);
+        } else {
+            flyWheelA.setPower(0);
+            flyWheelB.setPower(0);
+        }
+    }
+
     //Intake control
     public void spinIntakes() {
         intakeB.setPower(0.5);
