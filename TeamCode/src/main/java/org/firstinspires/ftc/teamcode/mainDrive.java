@@ -20,23 +20,26 @@ import java.util.ArrayList;
 @TeleOp(name = "mainDrive", group = "Axolotl")
 public class mainDrive extends OpMode{
     //Hardware
-    private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, flyWheelA, flyWheelB; //Motors
-    private Servo magazineServo, loadServo hoodServo; //Servos
+    private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, intakeA, flyWheelA, flyWheelB; //Motors
+    private Servo magazineServo, loadServo, hoodServo; //Servos
     private NormalizedColorSensor colorSensorL; //Left Color Sensor
     private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
     private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
 
     //April Tag + Vision Portal stuff
-    AprilTagProcessor aprilTagProcessor;
+    //AprilTagProcessor aprilTagProcessor;
     VisionPortal visionPortal;
 
 
 
     //Variables
-    double speedMod = 0.5; //Speed of wheel motors (around 1/2 maximum rate)
+    double speedMod = 1; //Speed of wheel motors (around 1/2 maximum rate)
     double aprilTagReadAttempts = 1;
-    double[] magazineReadPositions = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
-    double[] loadServoPositions = {0.0, 90.0/300}; // Omar said 90 degrees sooooooooooo
+    double[] magazineReadPositionsBad = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
+    double offset = 0.85;
+    double[] magazineReadPositions = {magazineReadPositionsBad[0] + offset, magazineReadPositionsBad[1] + offset, magazineReadPositionsBad[2] + offset}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
+//    double[] loadServoPositions = {0.0, /*90 / 300*/ 1 , () - 0.1}; // Omar said 90 degrees sooooooooooo
+    double[] loadServoPositions = {0.4, /*90 / 300*/ 0.8 , (90 / 300) - 0.1}; // Omar said 90 degrees sooooooooooo
     boolean movingElevator = false;
 
     // !IMPORTANT! artifactOrder is an ArrayList since it needs to be repeatedly scanned and edited.
@@ -57,13 +60,14 @@ public class mainDrive extends OpMode{
 
 
         intakeB = hardwareMap.get(DcMotorEx.class, "intakeB");
+        intakeA = hardwareMap.get(DcMotorEx.class, "intakeA");
 
         flyWheelA = hardwareMap.get(DcMotorEx.class, "flyWheelA");
         flyWheelB = hardwareMap.get(DcMotorEx.class, "flyWheelB");
         //Servos
         magazineServo = hardwareMap.get(Servo.class, "magazineServo");
         loadServo = hardwareMap.get(Servo.class, "loadServo");
-        loadServo = hardwareMap.get(Servo.class, "hoodServo");
+        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
         //Sensors
         colorSensorL = hardwareMap.get(NormalizedColorSensor.class, "colorSensorL");
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
@@ -74,50 +78,50 @@ public class mainDrive extends OpMode{
         magazineOrder.add("empty");
         magazineOrder.add("empty");
 
-        //Initialize AprilTag Detection
-        aprilTagProcessor = new AprilTagProcessor.Builder()
-                //Settings here
-                .build();
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam1"))
-                .addProcessor(aprilTagProcessor)
-                .setCameraResolution(new Size(640, 480))
-                .build();
-
-
-        //Initialization
-        magazineServo.setPosition(0.0);
-        loadServo.setPosition(0.0);
-
-        //AprilTag detection
-        try {
-            obeliskOrder = detectObelisk();
-        } catch (InterruptedException e) {
-            obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES
-        }
-
+//        //Initialize AprilTag Detection
+//        aprilTagProcessor = new AprilTagProcessor.Builder()
+//                //Settings here
+//                .build();
+//        visionPortal = new VisionPortal.Builder()
+//                .setCamera(hardwareMap.get(WebcamName.class, "Webcam1"))
+//                .addProcessor(aprilTagProcessor)
+//                .setCameraResolution(new Size(640, 480))
+//                .build();
+//
+//
+//        //Initialization
+//        magazineServo.setPosition(0.0);
+//        loadServo.setPosition(0.0);
+//
+//        //AprilTag detection
+//        try {
+//            obeliskOrder = detectObelisk();
+//        } catch (InterruptedException e) {
+//            obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES
+//        }
+//
     }
 
-    @Override
-    public void init_loop(){
-        if (!gamepad2.dpad_down) { // Safe initialization mode for redundancy, holding gamepad2 dpad down while passing from init_loop() to loop() will prevent the AprilTag processor from running.
-            try { //TRY/CATCH BECAUSE IT'S REQUIRED WHEN USING SLEEP()
-                obeliskOrder = detectObelisk() == null ? detectObelisk() : obeliskOrder; //Kinda weird, will replace later, if detectObelisk() returns null, it ignores it and keeps whatever the last value was.
-            } catch (InterruptedException e) {
-                obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES RATHER THAN THROWING A RANDOM ERROR. IT'S RIGHT 33.33% OF THE TIME AT LEAST
-            }
-        }
-        updateInitTelemetry();
-    }
+//    @Override
+//    public void init_loop(){
+//        if (!gamepad2.dpad_down) { // Safe initialization mode for redundancy, holding gamepad2 dpad down while passing from init_loop() to loop() will prevent the AprilTag processor from running.
+//            try { //TRY/CATCH BECAUSE IT'S REQUIRED WHEN USING SLEEP()
+//                obeliskOrder = detectObelisk() == null ? detectObelisk() : obeliskOrder; //Kinda weird, will replace later, if detectObelisk() returns null, it ignores it and keeps whatever the last value was.
+//            } catch (InterruptedException e) {
+//                obeliskOrder = new String[]{"green", "purple", "purple"}; // DEFAULT ORDER FOR ISSUES RATHER THAN THROWING A RANDOM ERROR. IT'S RIGHT 33.33% OF THE TIME AT LEAST
+//            }
+//        }
+//        updateInitTelemetry();
+//    }
 
     @Override
     public void loop(){
         drive(); // translation and rotation
         spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
-        aim();
+//        aim();
         //indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
-        updateTelemetry();
+//        updateTelemetry();
     }
 
     //Custom Classes
@@ -132,14 +136,14 @@ public class mainDrive extends OpMode{
         double y = gamepad1.left_stick_y;
         double rotation = -gamepad1.right_stick_x;
 
-        if (x + y > 0 && !movingElevator)
-        {
-          loadServo.setPosition(5); //Slightly off the ground
-        }
-        else if (x + y == 0 && !movingElevator)
-        {
-          loadSevo.setPosition(0);
-        }
+//        if (x + y > 0 && !movingElevator)
+//        {
+//          loadServo.setPosition(0.1); //Slightly off the ground
+//        }
+//        else if (x + y == 0 && !movingElevator)
+//        {
+//          loadServo.setPosition(loadServoPositions[1]);
+//        }
 
         //Wheel-by-wheel spin calculations
         double FL = (-x - y - rotation) * speedMod;
@@ -182,23 +186,38 @@ public class mainDrive extends OpMode{
         // move fly wheels = right trigger ya
         // setposition double is degree so like 1 is 180 and 0.5 is 90 <-- This is not true, you're probably thinking of radians since 180 is (pi) and 90 is (pi)/2. Unfortunately, our servos are [0, 1] between [0, 300] degrees
         // degrees vary cause idk them
+        if (gamepad2.dpad_left)
+        {
+          magazineServo.setPosition(magazineReadPositions[0]);
+        }
+        else if (gamepad2.dpad_up)
+        {
+          magazineServo.setPosition(magazineReadPositions[1]);
+        }
+        else if (gamepad2.dpad_right)
+        {
+          magazineServo.setPosition(magazineReadPositions[2]);
+        }
+
 
         //Fixed your degrees, Danya. Also, left is 0, up is 1, and right is 2.
 
-        movingElevator = false;
 
         //Omar said 0 to 90 degrees so blame him if it doesn't work.
         if (gamepad2.right_bumper){
-            loadServo.setPosition(loadServoPositions[1]);
-        movingElevator = true;
+            loadServo.setPosition(loadServoPositions[0]); //up 
+//        movingElevator = true;
         } else {
-            loadServo.setPosition(loadServoPositions[0]);
-        movingElevator = true;
+            loadServo.setPosition(loadServoPositions[1]); //down
+//            movingElevator = false;
         }
 
         if (gamepad2.right_trigger > 0.1) {
-            flyWheelA.setPower(1);
-            flyWheelB.setPower(1);
+            //flyWheelA.setPower(-1);
+            //flyWheelB.setPower(1);
+
+            flyWheelA.setPower(-gamepad2.right_trigger * 1);
+            flyWheelB.setPower(gamepad2.right_trigger * 1);
         } else {
             flyWheelA.setPower(0);
             flyWheelB.setPower(0);
@@ -210,10 +229,12 @@ public class mainDrive extends OpMode{
         if( gamepad1.a)
         {
           intakeB.setPower(0.5);
+          intakeA.setPower(0.5);
         }
         else
         {
           intakeB.setPower(0);
+          intakeA.setPower(0);
         }
     }
 
@@ -289,24 +310,24 @@ public class mainDrive extends OpMode{
     }
 
     // Scans the obelisk, returns either null for "can't see anything" and "ID out of range" or a 3-value String[] if it identifies an appropriate AprilTag code
-    public String[] detectObelisk() throws InterruptedException {
-        ArrayList<AprilTagDetection> obeliskDetections = aprilTagProcessor.getDetections(); //Gets the first detection of an apriltag, should only be the center one
-        if (obeliskDetections.isEmpty()) {
-            return null;
-        } else {
-            int id = obeliskDetections.get(0).id; //Gets the first element, only ONE element should be in frame.
-            switch (id) {
-                case 21:
-                    return new String[]{"green", "purple", "purple"};
-                case 22:
-                    return new String[]{"purple", "green", "purple"};
-                case 23:
-                    return new String[]{"purple", "purple", "green"};
-                default:
-                    return null; //REFERS TO DEFAULT FAILURE HANDLING IN LOOP
-            }
-        }
+//    public String[] detectObelisk() throws InterruptedException {
+//        ArrayList<AprilTagDetection> obeliskDetections = aprilTagProcessor.getDetections(); //Gets the first detection of an apriltag, should only be the center one
+//        if (obeliskDetections.isEmpty()) {
+//            return null;
+//        } else {
+//            int id = obeliskDetections.get(0).id; //Gets the first element, only ONE element should be in frame.
+//            switch (id) {
+//                case 21:
+//                    return new String[]{"green", "purple", "purple"};
+//                case 22:
+//                    return new String[]{"purple", "green", "purple"};
+//                case 23:
+//                    return new String[]{"purple", "purple", "green"};
+//                default:
+//                    return null; //REFERS TO DEFAULT FAILURE HANDLING IN LOOP
+//            }
+//        }
 
-    }
+//    }
 
 }
