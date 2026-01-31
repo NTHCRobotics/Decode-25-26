@@ -36,6 +36,7 @@ public class mainDrive extends OpMode{
     double offset = 0.85;
     double[] magazineReadPositions = {0.0 + offset, 360.0/3/300 + offset, 360.0/3/300*2 + offset}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
 //    double[] loadServoPositions = {0.0, /*90 / 300*/ 1 , () - 0.1}; // Omar said 90 degrees sooooooooooo
+    int magazineCurrentIndex = 0;
     double[] loadServoPositions = {0.4, /*90 / 300*/ 0.8 , (90 / 300) - 0.1}; // Omar said 90 degrees sooooooooooo
     boolean movingElevator = false;
 
@@ -71,9 +72,9 @@ public class mainDrive extends OpMode{
         colorSensorFR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorFR");
 
         //Initialize magazine orders with null (so size = 3)
-        magazineOrder.add("empty");
-        magazineOrder.add("empty");
-        magazineOrder.add("empty");
+        magazineOrder.add("purple");
+        magazineOrder.add("purple");
+        magazineOrder.add("green");
 
 //        //Initialize AprilTag Detection
 //        aprilTagProcessor = new AprilTagProcessor.Builder()
@@ -118,14 +119,18 @@ public class mainDrive extends OpMode{
 //        aim();
         //indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
-//        updateTelemetry();
-        indexArtifacts();
+        //updateTelemetry();
+    //    indexArtifacts();
         if (gamepad1.dpad_up) {
             try {
                 launchInOrder();
             } catch (InterruptedException e) {
 
             }
+        }
+
+        if (gamepad1.dpad_right) {
+            rotateMagazineManual();
         }
     }
 
@@ -183,6 +188,11 @@ public class mainDrive extends OpMode{
 
 
 
+    }
+
+    public void rotateMagazineManual() {
+        magazineServo.setPosition(magazineReadPositions[magazineCurrentIndex]);
+        magazineCurrentIndex = (magazineCurrentIndex+1) % 3;
     }
 
     public void launchArtifactManual(){
@@ -310,8 +320,16 @@ public class mainDrive extends OpMode{
 
     public void updateTelemetry() {
         telemetry.addData("Magazine Order", magazineOrder.get(0) + " " + magazineOrder.get(1) + " " + magazineOrder.get(2));
-        telemetry.addData("Wheel Powers", wheelFL.getPower() + "    " + wheelFR.getPower() + "\n"
+        telemetry.addData("Wheel Powers", wheelFL.getPower() + "    " + wheelFR.getPower() + "\n" + "               "
                                                       +wheelBL.getPower() + "     " + wheelBR.getPower()); //Hopefully this serves as a bit of a better display, remove if not.
+
+        telemetry.addData("CSL Red", colorSensorL.getNormalizedColors().red);
+        telemetry.addData("CSL Green", colorSensorL.getNormalizedColors().green);
+        telemetry.addData("CSL Blue", colorSensorL.getNormalizedColors().blue);
+
+        telemetry.update();
+
+
     }
 
     // Scans the obelisk, returns either null for "can't see anything" and "ID out of range" or a 3-value String[] if it identifies an appropriate AprilTag code

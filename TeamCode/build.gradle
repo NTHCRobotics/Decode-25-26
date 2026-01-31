@@ -25,5 +25,5 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
-    implementation files('/home/omar/Documents/Decode-25-26/TeamCode/lib/REVLib-java-2025.0.3.jar')
+    implementation files('lib/REVLib-java-2025.0.3.jar')
 }
