@@ -40,6 +40,8 @@ public class mainDrive extends OpMode{
     double[] loadServoPositions = {0.4, /*90 / 300*/ 0.8 , (90 / 300) - 0.1}; // Omar said 90 degrees sooooooooooo
     boolean movingElevator = false;
 
+    boolean dPadRightDown = false; //TEST
+
     // !IMPORTANT! artifactOrder is an ArrayList since it needs to be repeatedly scanned and edited.
     // 0 --> L, 1 --> BR, 2 --> FR
     ArrayList<String> magazineOrder = new ArrayList<String>(); //correlates to the artifact color currently in readPositions (e.g. the artifacts in the magazine)
@@ -112,6 +114,12 @@ public class mainDrive extends OpMode{
 //        updateInitTelemetry();
 //    }
 
+
+    @Override
+    public void init_loop() {
+        magazineServo.setPosition(0.9);
+    }
+
     @Override
     public void loop(){
         drive(); // translation and rotation
@@ -129,9 +137,18 @@ public class mainDrive extends OpMode{
             }
         }
 
-        if (gamepad1.dpad_right) {
+
+        if (gamepad1.dpad_right && !dPadRightDown) {
             rotateMagazineManual();
+            dPadRightDown = true;
         }
+
+        if (!gamepad1.dpad_right){
+            dPadRightDown = false;
+        }
+
+        telemetry.addData("Magazine Index", magazineCurrentIndex);
+        telemetry.update();
     }
 
     //Custom Classes
