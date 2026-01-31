@@ -22,9 +22,7 @@ public class mainDrive extends OpMode{
     //Hardware
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, intakeA, flyWheelA, flyWheelB; //Motors
     private Servo magazineServo, loadServo, hoodServo; //Servos
-    private NormalizedColorSensor colorSensorL; //Left Color Sensor
-    private NormalizedColorSensor colorSensorBR; //Right Back Color Sensor
-    private NormalizedColorSensor colorSensorFR; //Right Front Color Sensor
+    private NormalizedColorSensor colorSensorL, colorSensorBR, colorSensorFR; //Color sensors
 
     //April Tag + Vision Portal stuff
     //AprilTagProcessor aprilTagProcessor;
@@ -35,9 +33,8 @@ public class mainDrive extends OpMode{
     //Variables
     double speedMod = 1; //Speed of wheel motors (around 1/2 maximum rate)
     double aprilTagReadAttempts = 1;
-    double[] magazineReadPositionsBad = {0.0, 360.0/3/300, 360.0/3/300*2}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
     double offset = 0.85;
-    double[] magazineReadPositions = {magazineReadPositionsBad[0] + offset, magazineReadPositionsBad[1] + offset, magazineReadPositionsBad[2] + offset}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
+    double[] magazineReadPositions = {0.0 + offset, 360.0/3/300 + offset, 360.0/3/300*2 + offset}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
 //    double[] loadServoPositions = {0.0, /*90 / 300*/ 1 , () - 0.1}; // Omar said 90 degrees sooooooooooo
     double[] loadServoPositions = {0.4, /*90 / 300*/ 0.8 , (90 / 300) - 0.1}; // Omar said 90 degrees sooooooooooo
     boolean movingElevator = false;
@@ -122,6 +119,14 @@ public class mainDrive extends OpMode{
         //indexArtifacts(); // Keeps a running list of what artifacts exist within the magazine
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
 //        updateTelemetry();
+        indexArtifacts();
+        if (gamepad1.dpad_up) {
+            try {
+                launchInOrder();
+            } catch (InterruptedException e) {
+
+            }
+        }
     }
 
     //Custom Classes
