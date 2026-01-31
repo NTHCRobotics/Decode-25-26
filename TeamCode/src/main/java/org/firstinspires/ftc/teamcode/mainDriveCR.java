@@ -34,7 +34,7 @@ public class mainDriveCR extends OpMode{
 
 
     //Variables
-    double speedMod = 1; //Speed of wheel motors (around 1/2 maximum rate)
+    double speedMod = 1;
     double aprilTagReadAttempts = 1;
     double offset = 0;
     double[] magazinePositions = {0.3072, 0.7496}; //REPLACE WITH ACTUAL VALUES
@@ -142,6 +142,14 @@ public class mainDriveCR extends OpMode{
         double y = gamepad1.left_stick_y;
         double rotation = -gamepad1.right_stick_x;
 
+        //rotation compensation
+
+        if (gamepad1.left_stick_y > 0.05) {
+            rotation -= y * 0.35;
+        } else if (gamepad1.left_stick_y < 0.05) {
+            rotation -= y * 0.15;
+        }
+
 //        if (x + y > 0 && !movingElevator)
 //        {
 //          loadServo.setPosition(0.1); //Slightly off the ground
@@ -157,10 +165,16 @@ public class mainDriveCR extends OpMode{
         double BL = (x - y - rotation) * speedMod;
         double BR = (x + y - rotation) * speedMod;
 
+
+
         wheelFL.setPower(FL);
         wheelFR.setPower(FR);
         wheelBL.setPower(BL);
         wheelBR.setPower(BR);
+    }
+
+    public void isMagazineOccupied(){
+        //double distance = colorSensorL.getNormalizedColors().
     }
 
     public void aim()
@@ -193,6 +207,12 @@ public class mainDriveCR extends OpMode{
         else if (gamepad2.dpad_left) {
             magazineServo.setPosition(magazinePositions[1]);
         }
+
+        if (gamepad2.x) {
+            magazineServo.setPosition(magazineServo.getPosition() - 0.001);
+        } else if (gamepad2.b){
+            magazineServo.setPosition(magazineServo.getPosition() + 0.001);
+        }
     }
 
     public void launchArtifactManual(){
@@ -220,8 +240,8 @@ public class mainDriveCR extends OpMode{
             //flyWheelA.setPower(-1);
             //flyWheelB.setPower(1);
 
-            flyWheelA.setPower(-gamepad2.right_trigger * 1);
-            flyWheelB.setPower(gamepad2.right_trigger * 1);
+            flyWheelA.setPower(-gamepad2.right_trigger * 0.85);
+            flyWheelB.setPower(gamepad2.right_trigger * 0.85);
         } else {
             flyWheelA.setPower(0);
             flyWheelB.setPower(0);
@@ -234,6 +254,9 @@ public class mainDriveCR extends OpMode{
         {
           intakeB.setPower(0.5);
           intakeA.setPower(0.5);
+        } else if (gamepad1.y) {
+            intakeA.setPower(-0.5);
+            intakeB.setPower(-0.5);
         }
         else
         {
