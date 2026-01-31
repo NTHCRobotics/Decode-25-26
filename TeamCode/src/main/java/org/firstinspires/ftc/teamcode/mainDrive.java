@@ -139,17 +139,17 @@ public class mainDrive extends OpMode{
         //}
 
 
-        //if (gamepad1.dpad_right && !dPadRightDown) {
-        //    rotateMagazineManual();
-        //    dPadRightDown = true;
-        //}
+        if (gamepad1.dpad_right && !dPadRightDown) {
+            rotateMagazineManual();
+            dPadRightDown = true;
+        }
 
-        //if (!gamepad1.dpad_right){
-        //    dPadRightDown = false;
-        //}
+        if (!gamepad1.dpad_right){
+            dPadRightDown = false;
+        }
 
-        //telemetry.addData("Magazine Index", magazineCurrentIndex);
-        //telemetry.update();
+        telemetry.addData("Magazine Index", magazineCurrentIndex);
+        telemetry.update();
     }
 
     //Custom Classes

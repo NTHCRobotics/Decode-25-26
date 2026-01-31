@@ -7,6 +7,7 @@ import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.ArrayList;
@@ -19,12 +20,12 @@ public class getMagazinePos extends OpMode {
     public double posCurrent = 0;
     public double pos1;
     public double pos2;
-    public double pos3;
 
     @Override
     public void init() {
         magazineServo = hardwareMap.get(Servo.class, "magazineServo");
         magazineServo.setPosition(posCurrent);
+
     }
 
 
@@ -58,15 +59,11 @@ public class getMagazinePos extends OpMode {
         if (gamepad1.dpad_up) {
             pos2 = posCurrent;
         }
-        if (gamepad1.dpad_right) {
-            pos3 = posCurrent;
-        }
 
 
         telemetry.addData("Current Position: ", posCurrent);
         telemetry.addData("Position One: ", pos1);
         telemetry.addData("Position Two: ", pos2);
-        telemetry.addData("Position Three: ", pos3);
         telemetry.update();
     }
 }

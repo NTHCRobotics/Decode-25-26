@@ -7,9 +7,10 @@ import android.util.Size;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -22,7 +23,8 @@ import java.util.ArrayList;
 public class mainDriveCR extends OpMode{
     //Hardware
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, intakeA, flyWheelA, flyWheelB; //Motors
-    private CRServo magazineServo, loadServo, hoodServo; //Servos
+    private Servo magazineServo;
+    private CRServo loadServo, hoodServo; //Servos
     private NormalizedColorSensor colorSensorL, colorSensorBR, colorSensorFR; //Color sensors
 
     //April Tag + Vision Portal stuff
@@ -35,8 +37,7 @@ public class mainDriveCR extends OpMode{
     double speedMod = 1; //Speed of wheel motors (around 1/2 maximum rate)
     double aprilTagReadAttempts = 1;
     double offset = 0;
-    double[] magazineReadPositions = {0.0 + offset, 360.0/3/300 + offset, 360.0/3/300*2 + offset}; //lists out 1/3rd rotations of the magazine. The weird math is to normalize it to [0,1] given the servo's 300 degree range.
-//    double[] loadServoPositions = {0.0, /*90 / 300*/ 1 , () - 0.1}; // Omar said 90 degrees sooooooooooo
+    double[] magazinePositions = {0.2, 0.8}; //REPLACE WITH ACTUAL VALUES
     int magazineCurrentIndex = 0;
     //double[] loadServoPositions = {0.6, /*90 / 300*/ 0.8 , (90 / 300) - 0.1}; // Omar said 90 degrees sooooooooooo
     double[] loadServoPositions = {0.0898, 0.5188, 0.9477}; // Omar said 90 degrees sooooooooooo
@@ -67,7 +68,7 @@ public class mainDriveCR extends OpMode{
         flyWheelA = hardwareMap.get(DcMotorEx.class, "flyWheelA");
         flyWheelB = hardwareMap.get(DcMotorEx.class, "flyWheelB");
         //Servos
-        magazineServo = hardwareMap.get(CRServo.class, "magazineServo");
+        magazineServo = hardwareMap.get(Servo.class, "magazineServo");
         loadServo = hardwareMap.get(CRServo.class, "loadServo");
         hoodServo = hardwareMap.get(CRServo.class, "hoodServo");
         //Sensors
@@ -79,6 +80,8 @@ public class mainDriveCR extends OpMode{
         magazineOrder.add("purple");
         magazineOrder.add("purple");
         magazineOrder.add("green");
+
+        magazineServo.setPosition(magazinePositions[0]);
 
 //        //Initialize AprilTag Detection
 //        aprilTagProcessor = new AprilTagProcessor.Builder()
@@ -123,6 +126,8 @@ public class mainDriveCR extends OpMode{
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
         //aim();
         //updateTelemetry();
+        magazineControlManual();
+
     }
 
     //Custom Classes
@@ -181,6 +186,15 @@ public class mainDriveCR extends OpMode{
 
     }
 
+    public void magazineControlManual() {
+        if (gamepad1.dpad_right) {
+            magazineServo.setPosition(magazinePositions[0]);
+        }
+        else if (gamepad1.dpad_left) {
+            magazineServo.setPosition(magazinePositions[1]);
+        }
+    }
+
     public void launchArtifactManual(){
         // change magazine order = the dpad brah
         // move elevator up = right bumper
@@ -200,19 +214,7 @@ public class mainDriveCR extends OpMode{
         {
           loadServo.setPower(0);
         }
-        
-       
 
-        //Omar said 0 to 90 degrees so blame him if it doesn't work.
-        if (gamepad2.right_bumper){
-            magazineServo.setPower(1);
-        } 
-        else if (gamepad2.left_bumper) {
-            magazineServo.setPower(-1);
-        }
-        else {
-            magazineServo.setPower(0);
-        }
 
         if (gamepad2.right_trigger > 0.1) {
             //flyWheelA.setPower(-1);
