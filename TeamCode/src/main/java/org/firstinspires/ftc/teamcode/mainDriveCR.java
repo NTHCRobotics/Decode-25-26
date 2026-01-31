@@ -18,11 +18,11 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "mainDrive", group = "Axolotl")
-public class mainDrive extends OpMode{
+@TeleOp(name = "mainDriveCR", group = "Axolotl")
+public class mainDriveCR extends OpMode{
     //Hardware
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, intakeA, flyWheelA, flyWheelB; //Motors
-    private Servo magazineServo, loadServo, hoodServo; //Servos
+    private CRServo magazineServo, loadServo, hoodServo; //Servos
     private NormalizedColorSensor colorSensorL, colorSensorBR, colorSensorFR; //Color sensors
 
     //April Tag + Vision Portal stuff
@@ -67,9 +67,9 @@ public class mainDrive extends OpMode{
         flyWheelA = hardwareMap.get(DcMotorEx.class, "flyWheelA");
         flyWheelB = hardwareMap.get(DcMotorEx.class, "flyWheelB");
         //Servos
-        magazineServo = hardwareMap.get(Servo.class, "magazineServo");
-        loadServo = hardwareMap.get(Servo.class, "loadServo");
-        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
+        magazineServo = hardwareMap.get(CRServo.class, "magazineServo");
+        loadServo = hardwareMap.get(CRServo.class, "loadServo");
+        hoodServo = hardwareMap.get(CRServo.class, "hoodServo");
         //Sensors
         colorSensorL = hardwareMap.get(NormalizedColorSensor.class, "colorSensorL");
         colorSensorBR = hardwareMap.get(NormalizedColorSensor.class, "colorSensorBR");
@@ -116,40 +116,13 @@ public class mainDrive extends OpMode{
 //        updateInitTelemetry();
 //    }
 
-
-    @Override
-    public void init_loop() {
-        //magazineServo.setPosition(0.9);
-    }
-
     @Override
     public void loop(){
         drive(); // translation and rotation
         spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
-//        aim();
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
+        //aim();
         //updateTelemetry();
-    //    indexArtifacts();
-        //if (gamepad1.dpad_up) {
-        //    try {
-        //        launchInOrder();
-        //    } catch (InterruptedException e) {
-
-        //    }
-        //}
-
-
-        //if (gamepad1.dpad_right && !dPadRightDown) {
-        //    rotateMagazineManual();
-        //    dPadRightDown = true;
-        //}
-
-        //if (!gamepad1.dpad_right){
-        //    dPadRightDown = false;
-        //}
-
-        //telemetry.addData("Magazine Index", magazineCurrentIndex);
-        //telemetry.update();
     }
 
     //Custom Classes
@@ -187,30 +160,25 @@ public class mainDrive extends OpMode{
 
     public void aim()
     {
-      double x = -gamepad1.left_stick_x;
-      double y = gamepad1.left_stick_y;
+      double x = -gamepad2.left_stick_x;
+      double y = gamepad2.left_stick_y;
 
       if (x > 0)
       {
-        hoodServo.setPosition(180);
+        hoodServo.setPower( 0.5  + (0.5* x ));
       }
       else if (x < 0)
       {
-        hoodServo.setPosition(0);
+        hoodServo.setPower(0.5 - (0.5 * x));
       }
       else
       {
-        hoodServo.setPosition(90);
+        hoodServo.setPower(0.5);
       }
 
 
 
 
-    }
-
-    public void rotateMagazineManual() {
-        magazineServo.setPosition(magazineReadPositions[magazineCurrentIndex]);
-        magazineCurrentIndex = (magazineCurrentIndex+1) % 3;
     }
 
     public void launchArtifactManual(){
@@ -220,41 +188,30 @@ public class mainDrive extends OpMode{
         // setposition double is degree so like 1 is 180 and 0.5 is 90 <-- This is not true, you're probably thinking of radians since 180 is (pi) and 90 is (pi)/2. Unfortunately, our servos are [0, 1] between [0, 300] degrees
         // degrees vary cause idk them
         
-        if (gamepad2.dpad_left)
+        if (gamepad2.dpad_up)
         {
-          magazineServo.setPosition(magazineReadPositions[0]);
+          loadServo.setPower(1);
         }
-        else if (gamepad2.dpad_up)
+        else if (gamepad2.dpad_down)
         {
-          magazineServo.setPosition(magazineReadPositions[1]);
+          loadServo.setPower(-1);
         }
-        else if (gamepad2.dpad_right)
+        else 
         {
-          magazineServo.setPosition(magazineReadPositions[2]);
+          loadServo.setPower(0);
         }
         
        
-        //if (gamepad2.dpad_left)
-        //{
-        //  magazineServo.setPosition(0);
-        //}
-        //else if (gamepad2.dpad_up)
-        //{
-        //  magazineServo.setPosition(1);
-        //}
-
-
-        //Fixed your degrees, Danya. Also, left is 0, up is 1, and right is 2.
-
 
         //Omar said 0 to 90 degrees so blame him if it doesn't work.
         if (gamepad2.right_bumper){
-            loadServo.setPosition(0.65); //up
-            //loadServo.setPosition(loadServoPositions[1]); 
-                                                          //
-        } else {
-            loadServo.setPosition(0); //down
-            //loadServo.setPosition(loadServoPositions[0]); //down
+            magazineServo.setPower(1);
+        } 
+        else if (gamepad2.left_bumper) {
+            magazineServo.setPower(-1);
+        }
+        else {
+            magazineServo.setPower(0);
         }
 
         if (gamepad2.right_trigger > 0.1) {
@@ -311,33 +268,6 @@ public class mainDrive extends OpMode{
         }
         else {
             return "green";
-        }
-    }
-
-    public void indexArtifacts() {
-        String colorL = colorMatch(colorSensorL, 0.5, 0.5, 100);
-        String colorBR = colorMatch(colorSensorBR, 0.5, 0.5, 100);
-        String colorFR = colorMatch(colorSensorFR, 0.5, 0.5, 100);
-
-        magazineOrder.set(0, colorL);
-        magazineOrder.set(1, colorBR);
-        magazineOrder.set(2, colorFR);
-    }
-
-    public void launchInOrder() throws InterruptedException {
-        for (int i = 0; i < 3; i++){
-            //Explanation: for each ball in the magazine, match its position with an index in the obelisk order, set position to the [i]th ball, load it, then retract and move onto the next.
-            int index = magazineOrder.indexOf(obeliskOrder[i]);
-            if (index == -1){
-                continue; //Skip to the next part if it can't find the ball
-            }
-            magazineServo.setPosition(magazineReadPositions[index]);
-            sleep(200); //Allows for the magazine to rotate
-            loadServo.setPosition(loadServoPositions[1]);
-            sleep(1000);
-            loadServo.setPosition(loadServoPositions[0]);
-            sleep(100);
-            magazineOrder.set(i, "empty");
         }
     }
 
