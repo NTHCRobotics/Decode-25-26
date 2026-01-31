@@ -37,7 +37,7 @@ public class mainDriveCR extends OpMode{
     double speedMod = 1; //Speed of wheel motors (around 1/2 maximum rate)
     double aprilTagReadAttempts = 1;
     double offset = 0;
-    double[] magazinePositions = {0.2, 0.8}; //REPLACE WITH ACTUAL VALUES
+    double[] magazinePositions = {0.3072, 0.7496}; //REPLACE WITH ACTUAL VALUES
     int magazineCurrentIndex = 0;
     //double[] loadServoPositions = {0.6, /*90 / 300*/ 0.8 , (90 / 300) - 0.1}; // Omar said 90 degrees sooooooooooo
     double[] loadServoPositions = {0.0898, 0.5188, 0.9477}; // Omar said 90 degrees sooooooooooo
@@ -187,10 +187,10 @@ public class mainDriveCR extends OpMode{
     }
 
     public void magazineControlManual() {
-        if (gamepad1.dpad_right) {
+        if (gamepad2.dpad_right) {
             magazineServo.setPosition(magazinePositions[0]);
         }
-        else if (gamepad1.dpad_left) {
+        else if (gamepad2.dpad_left) {
             magazineServo.setPosition(magazinePositions[1]);
         }
     }
