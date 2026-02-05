@@ -144,11 +144,11 @@ public class mainDriveCR extends OpMode{
 
         //rotation compensation
 
-        if (gamepad1.left_stick_y > 0.05) {
-            rotation -= y * 0.35;
-        } else if (gamepad1.left_stick_y < 0.05) {
-            rotation -= y * 0.15;
-        }
+        //if (gamepad1.left_stick_y > 0.05) {
+        //    rotation -= y * 0.35;
+        //} else if (gamepad1.left_stick_y < 0.05) {
+        //    rotation -= y * 0.15;
+        //}
 
 //        if (x + y > 0 && !movingElevator)
 //        {
@@ -160,10 +160,10 @@ public class mainDriveCR extends OpMode{
 //        }
 
         //Wheel-by-wheel spin calculations
-        double FL = (-x - y - rotation) * speedMod;
-        double FR = (-x + y - rotation) * speedMod;
-        double BL = (x - y - rotation) * speedMod;
-        double BR = (x + y - rotation) * speedMod;
+        double FL = (-x + y - rotation) * speedMod;
+        double FR = (-x - y - rotation) * speedMod;
+        double BL = (x + y - rotation) * speedMod;
+        double BR = (x - y - rotation) * speedMod;
 
 
 
