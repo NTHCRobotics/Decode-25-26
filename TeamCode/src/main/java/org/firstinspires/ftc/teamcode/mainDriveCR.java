@@ -23,8 +23,8 @@ import java.util.ArrayList;
 public class mainDriveCR extends OpMode{
     //Hardware
     private DcMotorEx wheelFL, wheelFR, wheelBL, wheelBR, intakeB, intakeA, flyWheelA, flyWheelB; //Motors
-    private Servo magazineServo;
-    private CRServo loadServo, hoodServo; //Servos
+    private Servo magazineServo, loadServo;
+    private CRServo hoodServo; //Servos
     private NormalizedColorSensor colorSensorL, colorSensorBR, colorSensorFR; //Color sensors
 
     //April Tag + Vision Portal stuff
