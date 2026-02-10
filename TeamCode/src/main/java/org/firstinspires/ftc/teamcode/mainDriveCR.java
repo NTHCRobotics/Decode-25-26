@@ -69,7 +69,7 @@ public class mainDriveCR extends OpMode{
         flyWheelB = hardwareMap.get(DcMotorEx.class, "flyWheelB");
         //Servos
         magazineServo = hardwareMap.get(Servo.class, "magazineServo");
-        loadServo = hardwareMap.get(CRServo.class, "loadServo");
+        loadServo = hardwareMap.get(Servo.class, "loadServo");
         hoodServo = hardwareMap.get(CRServo.class, "hoodServo");
         //Sensors
         colorSensorL = hardwareMap.get(NormalizedColorSensor.class, "colorSensorL");
@@ -224,15 +224,15 @@ public class mainDriveCR extends OpMode{
         
         if (gamepad2.dpad_up)
         {
-          loadServo.setPower(1);
+          loadServo.setPosition(1);
         }
         else if (gamepad2.dpad_down)
         {
-          loadServo.setPower(-1);
+          loadServo.setPosition(-1);
         }
         else 
         {
-          loadServo.setPower(0);
+          loadServo.setPosition(0);
         }
 
 
