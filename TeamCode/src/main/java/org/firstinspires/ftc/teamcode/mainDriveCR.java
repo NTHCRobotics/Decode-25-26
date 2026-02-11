@@ -209,9 +209,9 @@ public class mainDriveCR extends OpMode{
         }
 
         if (gamepad2.x) {
-            magazineServo.setPosition(magazineServo.getPosition() - 0.001);
+            magazineServo.setPosition(magazineServo.getPosition() - 0.00025);
         } else if (gamepad2.b){
-            magazineServo.setPosition(magazineServo.getPosition() + 0.001);
+            magazineServo.setPosition(magazineServo.getPosition() + 0.00025);
         }
     }
 
