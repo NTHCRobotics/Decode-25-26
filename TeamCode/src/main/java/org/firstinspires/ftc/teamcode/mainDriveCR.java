@@ -120,11 +120,11 @@ public class mainDriveCR extends OpMode{
 //    }
 
     @Override
-    public void loop(){
+    public void loop() {
         drive(); // translation and rotation
         spinIntakes(); //Spinning the intakes (duh) DISABLED UNTIL BUTTON IS BOUND
         launchArtifactManual(); //Manual artifact launching, default for now unless we cna get something crazy working.
-        //aim();
+        aim();
         //updateTelemetry();
         magazineControlManual();
 
@@ -180,20 +180,24 @@ public class mainDriveCR extends OpMode{
     public void aim()
     {
       double x = -gamepad2.left_stick_x;
-      double y = gamepad2.left_stick_y;
+      //double y = gamepad2.left_stick_y;
 
-      if (x > 0)
-      {
-        hoodServo.setPower( 0.5  + (0.5* x ));
-      }
-      else if (x < 0)
-      {
-        hoodServo.setPower(0.5 - (0.5 * x));
-      }
-      else
-      {
-        hoodServo.setPower(0.5);
-      }
+        hoodServo.setPower(x);
+
+        //Omar code below
+
+//      if (x > 0)
+//      {
+//        hoodServo.setPower( 0.5  + (0.5* x ));
+//      }
+//      else if (x < 0)
+//      {
+//        hoodServo.setPower(0.5 - (0.5 * x));
+//      }
+//      else
+//      {
+//        hoodServo.setPower(0);
+//      }
 
 
 
@@ -222,7 +226,7 @@ public class mainDriveCR extends OpMode{
         // setposition double is degree so like 1 is 180 and 0.5 is 90 <-- This is not true, you're probably thinking of radians since 180 is (pi) and 90 is (pi)/2. Unfortunately, our servos are [0, 1] between [0, 300] degrees
         // degrees vary cause idk them
         
-        if (gamepad2.dpad_up)
+        if (gamepad2.dpad_up && gamepad2.right_trigger > 0.1)
         {
           loadServo.setPosition(1);
         }
