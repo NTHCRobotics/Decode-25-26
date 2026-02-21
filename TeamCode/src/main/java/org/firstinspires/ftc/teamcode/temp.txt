@@ -1,13 +1,14 @@
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
+@TeleOp(name = "colorTest", group = "Axolotl")
 public class colorTest extends LinearOpMode {
     // Define a variable for our color sensor
-    ColorSensor colorBR, colorL, colorFR;
+    private ColorSensor colorBR, colorL, colorFR;
 
     @Override
     public void runOpMode() {
@@ -15,7 +16,6 @@ public class colorTest extends LinearOpMode {
         colorBR = hardwareMap.get(ColorSensor.class, "colorSensorBR");
         colorL = hardwareMap.get(ColorSensor.class, "colorSensorL");
         colorFR = hardwareMap.get(ColorSensor.class, "colorSensorFR");
-
 
         // Wait for the Play button to be pressed
         waitForStart();
@@ -41,14 +41,34 @@ public class colorTest extends LinearOpMode {
         }
     }
 
+    public String guessColorFR(int red, int green, int blue) {
+        int total = red + green + blue;
+        String answer = "";
+        if (total > 400) {
+            if ((green - blue > 15) && (green - blue > 0)) {
+                answer = "green";
+            }
+            else if (blue - green < 15) {
+                answer = "purple";
+            } else {
+                answer = "none";
+            }
+        }
+        else
+        {
+            answer = "none";
+        }
+        return answer;
+    }
+
     public String guessColorBR(int red, int green, int blue) {
         int total = red + green + blue;
         String answer = "";
-        if (total > 200) {
-            if ((green - blue > (total * .03)) && (green - blue > 0)) {
+        if (total > 400) {
+            if ((green - blue > 15) && (green - blue > 0)) {
                 answer = "green";
             }
-            else if (blue - green > (total * .01)) {
+            else if (blue - green < 15) {
                 answer = "purple";
             } else {
                 answer = "none";
@@ -64,11 +84,11 @@ public class colorTest extends LinearOpMode {
     public String guessColorL(int red, int green, int blue) {
         int total = red + green + blue;
         String answer = "";
-        if (total > 300) {
-            if ((green - blue > (total * .04)) && (green - blue > 0)) {
+        if (total > 400) {
+            if ((green - blue > 15) && (green - blue > 0)) {
                 answer = "green";
             }
-            else if (blue - green > (total * .015)) {
+            else if (blue - green < 15) {
                 answer = "purple";
             } else {
                 answer = "none";
@@ -80,24 +100,24 @@ public class colorTest extends LinearOpMode {
         }
         return answer;
     }
+}
 
-    public String guessColorFR(int red, int green, int blue) {
-        int total = red + green + blue;
-        String answer = "";
-        if (total > 200) {
-            if ((green - blue > (total * .04)) && (green - blue > 0)) {
-                answer = "green";
-            }
-            else if (blue - green > (total * .01)) {
-                answer = "purple";
-            } else {
-                answer = "none";
-            }
+public String guessColorFR(int red, int green, int blue) {
+    int total = red + green + blue;
+    String answer = "";
+    if (total > 400) {
+        if ((green - blue > 15) && (green - blue > 0)) {
+            answer = "green";
         }
-        else
-        {
+        else if (blue - green < 15) {
+            answer = "purple";
+        } else {
             answer = "none";
         }
-        return answer;
     }
+    else
+    {
+        answer = "none";
+    }
+    return answer;
 }
